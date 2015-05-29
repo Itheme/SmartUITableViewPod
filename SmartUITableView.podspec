@@ -77,7 +77,7 @@ updates in the storyboard or xib and don't forget to look at the log
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/Itheme/SmartUITableViewPod.git", :tag => "0.2.1" }
+  s.source       = { :git => "https://github.com/Itheme/SmartUITableViewPod.git", :tag => "0.2.0" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
