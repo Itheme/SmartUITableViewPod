@@ -60,7 +60,7 @@
         __block BOOL somethingBadHappenned = NO;
         if (newSectionsConfig.count != self.sectionsConfiguration.count) {
             somethingBadHappenned = YES;
-            NSLog(@"ERROR! Section count is different! Got %lu, but %d was expected", (unsigned long)newSectionsConfig.count, self.sectionsConfiguration.count);
+            NSLog(@"ERROR! Section count is different! Got %lu, but %lu was expected", (unsigned long)newSectionsConfig.count, (unsigned long)self.sectionsConfiguration.count);
         } else {
             NSMutableIndexSet *indexSetToReload = nil;
             for (NSInteger section = 0; section < self.sectionsConfiguration.count; section++) {
