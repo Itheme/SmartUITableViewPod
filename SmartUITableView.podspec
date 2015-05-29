@@ -88,7 +88,7 @@ updates in the storyboard or xib and don't forget to look at the log
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "Classes", "SmartUITableView.{h,m}"
+  s.source_files = "SmartUITableView.{h,m}"
   # s.exclude_files = "Classes/Exclude"
 
   # s.public_header_files = "Classes/**/*.h"
@@ -114,7 +114,7 @@ updates in the storyboard or xib and don't forget to look at the log
   #  the lib prefix of their name.
   #
 
-  # s.framework  = "SomeFramework"
+  s.framework  = "UIKit"
   # s.frameworks = "SomeFramework", "AnotherFramework"
 
   # s.library   = "iconv"
