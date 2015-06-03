@@ -8,6 +8,21 @@
 
 #import "SmartUITableView.h"
 
+typedef enum : NSUInteger {
+    TableOperationNone = 0,
+    TableOperationReloadSections,
+    TableOperationInsertSections,
+    TableOperationDeleteSections,
+    TableOperationMoveSections,
+    TableOperationInsertRows,
+    TableOperationDeleteRows,
+} TableOperation;
+
+static NSString *kOperation = @"Operation";
+static NSString *kParameter = @"Parameter0";
+static NSString *kOtherParameter = @"Parameter1";
+static NSString *kAnimation = @"Animation";
+
 @interface SectionConfig : NSObject
 @property (nonatomic, assign) BOOL validRowCount;
 @property (nonatomic, assign) NSInteger rowCount;
@@ -22,6 +37,7 @@
 @property (nonatomic, assign) BOOL updateMode;
 @property (nonatomic, strong) NSMutableArray *sectionsConfiguration;
 @property (nonatomic, strong) NSMutableArray *uiOperationsQueue;
+@property (nonatomic, strong) NSMutableArray *scheduledAnimations;
 
 @end
 
@@ -44,6 +60,7 @@
     if (self.sectionsConfiguration == nil) {
         self.sectionsConfiguration = [self getCurrentSectionsConfiguration];
     }
+    self.scheduledAnimations = [NSMutableArray array];
     [super beginUpdates];
 }
 
@@ -52,6 +69,41 @@
 //    §
 //}
 //
+
+- (void)performUpdates
+{
+    for (NSDictionary *dictionary in self.scheduledAnimations) {
+        switch ([dictionary[kOperation] integerValue]) {
+            case TableOperationReloadSections:
+                [super reloadSections:dictionary[kParameter]
+                     withRowAnimation:[dictionary[kAnimation] integerValue]];
+                break;
+            case TableOperationInsertSections:
+                [super insertSections:dictionary[kParameter]
+                     withRowAnimation:[dictionary[kAnimation] integerValue]];
+                break;
+            case TableOperationDeleteSections:
+                [super deleteSections:dictionary[kParameter]
+                     withRowAnimation:[dictionary[kAnimation] integerValue]];
+                break;
+            case TableOperationMoveSections:
+                [super moveSection:[dictionary[kParameter] integerValue]
+                         toSection:[dictionary[kOtherParameter] integerValue]];
+                break;
+            case TableOperationInsertRows:
+                [super insertRowsAtIndexPaths:dictionary[kParameter]
+                             withRowAnimation:[dictionary[kAnimation] integerValue]];
+                break;
+            case TableOperationDeleteRows:
+                [super deleteRowsAtIndexPaths:dictionary[kParameter]
+                             withRowAnimation:[dictionary[kAnimation] integerValue]];
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 - (void)endUpdates
 {
     if (self.sectionsConfiguration) { // if nil, table was reloaded
@@ -90,6 +142,7 @@
         if (somethingBadHappenned) {
             [self reloadData];
         } else {
+            [self performUpdates];
             self.sectionsConfiguration = newSectionsConfig;
         }
     } else {
@@ -130,7 +183,9 @@
             }
             [weakSelf.sectionsConfiguration insertObject:[[SectionConfig alloc] initWithIndex:targetIndex] atIndex:targetIndex];
         }];
-        [super insertSections:sections withRowAnimation:animation];
+        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationInsertSections),
+                                              kParameter: sections,
+                                              kAnimation: @(animation)}];
     } else {
         [self beginUpdates];
         [self insertSections:sections withRowAnimation:animation];
@@ -160,7 +215,9 @@
             }
         }];
         if (found) {
-            [super deleteSections:sections withRowAnimation:animation];
+            [self.scheduledAnimations addObject:@{kOperation: @(TableOperationDeleteSections),
+                                                  kParameter: sections,
+                                                  kAnimation: @(animation)}];
         } else {
             [self reloadData];
         }
@@ -177,6 +234,18 @@
 //{
 //    [super reloadSections:sections withRowAnimation:animation];
 //}
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+    if (self.updateMode) {
+        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationReloadSections),
+                                              kParameter: sections,
+                                              kAnimation: @(animation)}];
+    } else {
+        [self beginUpdates];
+        [self reloadSections:sections withRowAnimation:animation];
+        [self endUpdates];
+    }
+}
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
@@ -202,7 +271,9 @@
                 break;
             }
         }
-        [super moveSection:section toSection:newSection];
+        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationMoveSections),
+                                              kParameter: @(section),
+                                              kOtherParameter:@(newSection)}];
     } else {
         [self beginUpdates];
         [self moveSection:section toSection:newSection];
@@ -219,10 +290,12 @@
                 cfg.rowCount++;
             }
         }
-        [super insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationInsertRows),
+                                              kParameter: indexPaths,
+                                              kAnimation: @(animation)}];
     } else {
         [self beginUpdates];
-        [super insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+        [self insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
         [self endUpdates];
     }
 }
@@ -265,12 +338,14 @@
                 [self reloadSections:problematicSections withRowAnimation:UITableViewRowAnimationAutomatic];
             }
             if (existingIndexPaths.count) {
-                [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+                [self.scheduledAnimations addObject:@{kOperation: @(TableOperationDeleteRows),
+                                                      kParameter: indexPaths,
+                                                      kAnimation: @(animation)}];
             }
         }
     } else {
         [self beginUpdates];
-        [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+        [self deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
         [self endUpdates];
     }
 }
