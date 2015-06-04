@@ -237,9 +237,24 @@ static NSString *kAnimation = @"Animation";
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
     if (self.updateMode) {
-        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationReloadSections),
-                                              kParameter: sections,
-                                              kAnimation: @(animation)}];
+        __block BOOL allSectionsFound = YES;
+        __weak SmartUITableView *weakSelf = self;
+        [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+            SectionConfig *desiredConfig = [weakSelf sectionAtExactIndex:idx];
+            if (desiredConfig) {
+                desiredConfig.validRowCount = NO;
+            } else {
+                allSectionsFound = NO;
+                *stop = YES;
+            }
+        }];
+        if (allSectionsFound) {
+            [self.scheduledAnimations addObject:@{kOperation: @(TableOperationReloadSections),
+                                                  kParameter: sections,
+                                                  kAnimation: @(animation)}];
+        } else {
+            [self reloadData];
+        }
     } else {
         [self beginUpdates];
         [self reloadSections:sections withRowAnimation:animation];
@@ -284,15 +299,22 @@ static NSString *kAnimation = @"Animation";
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
     if (self.updateMode) {
+        BOOL everyPathIsFound = YES;
         for (NSIndexPath *indexPath in indexPaths) {
             SectionConfig *cfg = [self sectionAtExactIndex:indexPath.section];
             if (cfg) {
                 cfg.rowCount++;
+            } else {
+                everyPathIsFound = NO;
             }
         }
-        [self.scheduledAnimations addObject:@{kOperation: @(TableOperationInsertRows),
-                                              kParameter: indexPaths,
-                                              kAnimation: @(animation)}];
+        if (everyPathIsFound) {
+            [self.scheduledAnimations addObject:@{kOperation: @(TableOperationInsertRows),
+                                                  kParameter: indexPaths,
+                                                  kAnimation: @(animation)}];
+        } else {
+            [self reloadData];
+        }
     } else {
         [self beginUpdates];
         [self insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
