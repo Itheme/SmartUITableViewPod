@@ -146,6 +146,7 @@ static NSString *kAnimation = @"Animation";
             self.sectionsConfiguration = newSectionsConfig;
         }
     } else {
+        [self reloadData];
         self.sectionsConfiguration = [self getCurrentSectionsConfiguration];
     }
     self.updateMode = NO;
