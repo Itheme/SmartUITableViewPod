@@ -113,6 +113,27 @@ static NSString *kAnimation = @"Animation";
         if (newSectionsConfig.count != self.sectionsConfiguration.count) {
             somethingBadHappenned = YES;
             NSLog(@"ERROR! Section count is different! Got %lu, but %lu was expected", (unsigned long)newSectionsConfig.count, (unsigned long)self.sectionsConfiguration.count);
+            NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
+            NSInteger countDiff = ABS(newSectionsConfig.count - self.sectionsConfiguration.count);
+            for (NSInteger i = 1; i < countDiff + 1; i++) {
+                [indexSet addIndex:i];
+            }
+            if (newSectionsConfig.count > self.sectionsConfiguration.count) {
+                NSMutableIndexSet *allSections = [NSMutableIndexSet indexSet];
+                for (NSInteger i = 0; i < self.sectionsConfiguration.count; i++) {
+                    [allSections addIndex:i];
+                }
+                [super reloadSections:allSections withRowAnimation:UITableViewRowAnimationAutomatic];
+                [super insertSections:indexSet withRowAnimation:UITableViewRowAnimationAutomatic];
+            } else {
+                NSMutableIndexSet *allSections = [NSMutableIndexSet indexSet];
+                [allSections addIndex:0];
+                for (NSInteger i = countDiff + 1; i < self.sectionsConfiguration.count; i++) {
+                    [allSections addIndex:i];
+                }
+                [super reloadSections:allSections withRowAnimation:UITableViewRowAnimationAutomatic];
+                [super deleteSections:indexSet withRowAnimation:UITableViewRowAnimationAutomatic];
+            }
         } else {
             NSMutableIndexSet *indexSetToReload = nil;
             for (NSInteger section = 0; section < self.sectionsConfiguration.count; section++) {
