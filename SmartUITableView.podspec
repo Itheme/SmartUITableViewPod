@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "SmartUITableView"
-  s.version      = "0.2.4"
+  s.version      = "0.2.5"
   s.summary      = "UITableView that doesn't crash on wrong updates (iOS)"
 
   s.description  = <<-DESC
@@ -77,7 +77,7 @@ updates in the storyboard or xib and don't forget to look at the log
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/Itheme/SmartUITableViewPod.git", :tag => "0.2.4" }
+  s.source       = { :git => "https://github.com/Itheme/SmartUITableViewPod.git", :tag => "0.2.5" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #

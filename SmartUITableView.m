@@ -171,7 +171,13 @@ static NSString *kAnimation = @"Animation";
         self.sectionsConfiguration = [self getCurrentSectionsConfiguration];
     }
     self.updateMode = NO;
-    [super endUpdates];
+    @try {
+        [super endUpdates];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"ERROR! Unhandled difference between tableview data source section/row count and expected row count");
+        [self reloadData];
+    }
 }
 
 - (void) reloadData
