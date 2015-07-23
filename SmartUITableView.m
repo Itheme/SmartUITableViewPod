@@ -400,6 +400,34 @@ static NSString *kAnimation = @"Animation";
     }
 }
 
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+    if ((self.sectionsConfiguration.count > 0) && (indexPath.section >= 0)) {
+        if (self.sectionsConfiguration.count <= indexPath.section) {
+            [self scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row inSection:self.sectionsConfiguration.count - 1] atScrollPosition:scrollPosition animated:animated];
+        } else {
+            SectionConfig *config = (SectionConfig *)self.sectionsConfiguration[indexPath.section];
+            if (config.validRowCount) {
+                @try {
+                    if (config.rowCount > indexPath.row) {
+                        [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+                    } else {
+                        NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: can't scroll to row %ld of section %ld", (long)indexPath.row, (long)indexPath.section);
+                        [super scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:config.rowCount - 1 inSection:indexPath.row] atScrollPosition:scrollPosition animated:animated];
+                    }
+                }
+                @catch (NSException *exception) {
+                    NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: got exception %@", exception.description);
+                }
+            } else {
+                NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: can't scroll to row %ld of section %ld. Section is being reloaded", (long)indexPath.row, (long)indexPath.section);
+            }
+        }
+    } else {
+        NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: can't scroll to row %ld of section %ld. Table is being reloaded", (long)indexPath.row, (long)indexPath.section);
+    }
+}
+
 //- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 //{
 //    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
