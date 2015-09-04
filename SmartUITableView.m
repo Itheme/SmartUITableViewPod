@@ -428,10 +428,26 @@ static NSString *kAnimation = @"Animation";
     }
 }
 
-//- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
-//{
-//    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
-//}
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+    if (self.sectionsConfiguration.count > 0) {
+        NSMutableArray *validIndexPaths = [NSMutableArray array];
+        for (NSIndexPath *indexPath in indexPaths) {
+            if ((indexPath.section >= 0) && (self.sectionsConfiguration.count <= indexPath.section)) {
+                SectionConfig *config = (SectionConfig *)self.sectionsConfiguration[indexPath.section];
+                if (config.validRowCount && (config.rowCount > indexPath.row)) {
+                    [validIndexPaths addObject:indexPath];
+                }
+            }
+        }
+        @try {
+            [super reloadRowsAtIndexPaths:validIndexPaths withRowAnimation:animation];
+        }
+        @catch (NSException *exception) {
+            NSLog(@"ERROR! reloadRowsAtIndexPaths:withRowAnimation: got exception %@", exception.description);
+        }
+    }
+}
 //
 //- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 //{
