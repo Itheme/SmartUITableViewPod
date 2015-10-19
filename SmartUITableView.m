@@ -441,7 +441,9 @@ static NSString *kAnimation = @"Animation";
             }
         }
         @try {
-            [super reloadRowsAtIndexPaths:validIndexPaths withRowAnimation:animation];
+            if (validIndexPaths.count > 0) {
+                [super reloadRowsAtIndexPaths:validIndexPaths withRowAnimation:animation];
+            }
         }
         @catch (NSException *exception) {
             NSLog(@"ERROR! reloadRowsAtIndexPaths:withRowAnimation: got exception %@", exception.description);
