@@ -433,7 +433,7 @@ static NSString *kAnimation = @"Animation";
     if (self.sectionsConfiguration.count > 0) {
         NSMutableArray *validIndexPaths = [NSMutableArray array];
         for (NSIndexPath *indexPath in indexPaths) {
-            if ((indexPath.section >= 0) && (self.sectionsConfiguration.count <= indexPath.section)) {
+            if ((indexPath.section >= 0) && (self.sectionsConfiguration.count > indexPath.section)) {
                 SectionConfig *config = (SectionConfig *)self.sectionsConfiguration[indexPath.section];
                 if (config.validRowCount && (config.rowCount > indexPath.row)) {
                     [validIndexPaths addObject:indexPath];
