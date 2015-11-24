@@ -419,6 +419,12 @@ static NSString *kAnimation = @"Animation";
                 @catch (NSException *exception) {
                     NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: got exception %@", exception.description);
                 }
+                @try {
+                    [self reloadData];
+                }
+                @catch (NSException *exception) {
+                    NSLog(@"ERROR! reloadData failed after scrollToRowAtIndexPath:atScrollPosition:animated: got exception %@", exception.description);
+                }
             } else {
                 NSLog(@"ERROR! scrollToRowAtIndexPath:atScrollPosition:animated: can't scroll to row %ld of section %ld. Section is being reloaded", (long)indexPath.row, (long)indexPath.section);
             }
@@ -447,6 +453,7 @@ static NSString *kAnimation = @"Animation";
         }
         @catch (NSException *exception) {
             NSLog(@"ERROR! reloadRowsAtIndexPaths:withRowAnimation: got exception %@", exception.description);
+            [self reloadData];
         }
     }
 }
